@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import api from './../services/api'
-import { AuthProvider, useAuth } from './../context/AuthContext'
+import api from '../../services/api'
+import { AuthProvider, useAuth } from '../../context/AuthContext'
 
 interface Conversation {
   id: string
@@ -42,13 +42,10 @@ function DashboardContent() {
       setLoading(true)
       setError('')
       const response = await api.get('/conversations')
-      debugger
-      console.log('📦 FULL CONVERSATIONS RESPONSE:', response.data)
       
       let conversationsData: Conversation[] = []
-      debugger
+      
       if (Array.isArray(response.data)) {
-        debugger
         conversationsData = response.data
       } else if (response.data?.conversations && Array.isArray(response.data.conversations)) {
         conversationsData = response.data.conversations
@@ -56,17 +53,15 @@ function DashboardContent() {
         conversationsData = response.data.data
       }
       
-      // ✅ Ensure each conversation has an id
-      conversationsData = conversationsData.map(conv => ({
+      // Ensure each conversation has an id
+      conversationsData = conversationsData.map((conv: any) => ({
         ...conv,
         id: conv.id || conv._id || conv.conversationId
       }))
       
-      console.log('✅ FINAL CONVERSATIONS:', conversationsData.map(c => ({ id: c.id, name: c.name })))
-      
       setConversations(conversationsData)
     } catch (err: any) {
-      console.error('❌ Error fetching conversations:', err)
+      console.error('Error fetching conversations:', err)
       setError('Failed to load conversations. Please try again.')
     } finally {
       setLoading(false)
@@ -90,11 +85,11 @@ function DashboardContent() {
       }
       
       const currentUserId = user?._id
-      usersData = usersData.filter(u => u._id !== currentUserId)
+      usersData = usersData.filter((u: any) => u._id !== currentUserId)
       
       setSearchResults(usersData)
     } catch (err) {
-      console.error('❌ Error searching users:', err)
+      console.error('Error searching users:', err)
     } finally {
       setSearching(false)
     }
@@ -103,7 +98,6 @@ function DashboardContent() {
   const startDirectConversation = async (userId: string) => {
     try {
       const response = await api.post('/conversations', { userId })
-      console.log('📝 New Conversation Response:', response.data)
       
       setShowNewChat(false)
       setSearchTerm('')
@@ -111,8 +105,6 @@ function DashboardContent() {
       await fetchConversations()
       
       const conversationId = response.data?.id || response.data?.conversation?.id || response.data?._id
-      console.log('✅ Conversation ID:', conversationId)
-      
       if (conversationId) {
         router.push(`/chat/${conversationId}`)
       } else {
@@ -135,7 +127,6 @@ function DashboardContent() {
         name: groupName,
         participantIds: groupParticipants.map(p => p._id)
       })
-      console.log('👥 Group Created Response:', response.data)
       
       setShowGroupModal(false)
       setGroupName('')
@@ -143,8 +134,6 @@ function DashboardContent() {
       await fetchConversations()
       
       const conversationId = response.data?.id || response.data?.conversation?.id || response.data?._id
-      console.log('✅ Conversation ID:', conversationId)
-      
       if (conversationId) {
         router.push(`/chat/${conversationId}`)
       } else {
@@ -177,19 +166,15 @@ function DashboardContent() {
 
   const handleConversationClick = (conv: Conversation) => {
     const convId = conv.id || conv._id
-    console.log('🖱️ Clicked conversation:', { name: conv.name, id: convId })
-    
     if (convId && convId !== 'undefined') {
       router.push(`/chat/${convId}`)
     } else {
-      console.error('❌ Invalid conversation ID:', conv)
       alert('This conversation has an invalid ID')
     }
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div className="w-full sm:w-96 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
@@ -436,7 +421,6 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Main Content - Empty State */}
       <div className="hidden sm:flex flex-1 items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="text-6xl mb-4">💬</div>
