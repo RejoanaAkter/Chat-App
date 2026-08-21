@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import api from '../../services/api'
-import { AuthProvider, useAuth } from '../../context/AuthContext'
+import api from './../services/api'
+import { AuthProvider, useAuth } from './../context/AuthContext'
 
 interface Conversation {
   id: string
