@@ -4,23 +4,23 @@
 A modern, real-time chat application built with Next.js 16, TypeScript, and Tailwind CSS. 
 ---
 
-## 📋 Features
+## Features
 
 ### ✅ Completed Features
 
 | Feature | Description |
 |---------|-------------|
-| 🔐 **Login/Registration** | Login with phone number (auto-registration for new users) |
-| 👥 **User Search** | Search users by name or phone number |
-| 💬 **1-on-1 Chats** | Start direct conversations with any user |
-| 👥 **Group Chats** | Create groups with multiple participants |
-| 📝 **Real-time Messaging** | Send and receive messages instantly (polling every 3s) |
-| 📜 **Message History** | Full conversation history with timestamps |
-| 🔄 **Auto-scroll** | Automatically scrolls to latest message |
-| 🧠 **Smart Scroll** | Doesn't force scroll when user scrolls up |
-| 📱 **Responsive UI** | Works on desktop, tablet, and mobile |
-| 📚 **API Documentation** | Interactive API docs page |
-| 🏠 **Landing Page** | Creative showcase of the application |
+|  **Login/Registration** | Login with phone number (auto-registration for new users) |
+|  **User Search** | Search users by name or phone number |
+|  **1-on-1 Chats** | Start direct conversations with any user |
+|  **Group Chats** | Create groups with multiple participants |
+|  **Real-time Messaging** | Send and receive messages instantly (polling every 3s) |
+|  **Message History** | Full conversation history with timestamps |
+|  **Auto-scroll** | Automatically scrolls to latest message |
+|  **Smart Scroll** | Doesn't force scroll when user scrolls up |
+|  **Responsive UI** | Works on desktop, tablet, and mobile |
+|  **API Documentation** | Interactive API docs page |
+|  **Landing Page** | Creative showcase of the application |
 
 ### 🎨 UI/UX Highlights
 
@@ -46,36 +46,40 @@ A modern, real-time chat application built with Next.js 16, TypeScript, and Tail
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Folder Structure
 
-chat-app-assignment/
+### Folder Structure
+
+```
+chat-app/
 ├── src/
-│ └── app/
-│ ├── (auth)/
-│ │ └── login/ # Login page
-│ ├── api-docs/ # API documentation page
-│ ├── chat/ # Chat interface
-│ │ └── [conversationId]/
-│ ├── dashboard/ # Main dashboard
-│ ├── components/ # Reusable components
-│ ├── context/ # React Context providers
-│ │ └── AuthContext.tsx
-│ ├── services/ # API services
-│ │ └── api.ts
-│ ├── types/ # TypeScript interfaces
-│ ├── globals.css # Global styles
-│ ├── layout.tsx # Root layout
-│ └── page.tsx # Landing page
+│   └── app/
+│       ├── (auth)/
+│       │   └── login/              # Login page
+│       ├── api-docs/               # API documentation page
+│       ├── chat/                   # Chat interface
+│       │   └── [conversationId]/
+│       ├── dashboard/              # Main dashboard
+│       ├── components/             # Reusable components
+│       ├── context/                # React Context providers
+│       │   └── AuthContext.tsx
+│       ├── services/               # API services
+│       │   └── api.ts
+│       ├── types/                  # TypeScript interfaces
+│       ├── globals.css             # Global styles
+│       ├── layout.tsx              # Root layout
+│       └── page.tsx                # Landing page
 ├── docs/
-│ └── api-docs.md # API Documentation (Markdown)
-├── public/ # Static assets
+│   └── api-docs.md                 # API Documentation (Markdown)
+├── public/                         # Static assets
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
 ├── postcss.config.mjs
 └── README.md
+```
 
 
 
@@ -97,7 +101,7 @@ chat-app-assignment/
 
 ---
 
-## 🐛 Issues Encountered & Solutions
+##  Issues Encountered & Solutions
 
 | Issue | Solution |
 |-------|----------|
@@ -111,7 +115,7 @@ chat-app-assignment/
 
 ---
 
-## 📦 Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 
