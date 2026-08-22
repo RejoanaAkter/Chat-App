@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AuthProvider, useAuth } from './../../context/AuthContext'
+import Link from 'next/link'
+import { FaPhone, FaUser, FaArrowRight, FaSpinner, FaCommentDots, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa'
 
 function LoginForm() {
   const router = useRouter()
@@ -10,100 +12,253 @@ function LoginForm() {
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [isFocused, setIsFocused] = useState({ phone: false, name: false })
+  
+  const [phoneError, setPhoneError] = useState('')
+  const [nameError, setNameError] = useState('')
+  const [touched, setTouched] = useState({ phone: false, name: false })
+
+  const validatePhone = (value: string) => {
+    if (!value.trim()) {
+      setPhoneError('Phone number is required')
+      return false
+    }
+    const digits = value.replace(/[^0-9]/g, '')
+    if (digits.length < 10) {
+      setPhoneError('Enter a valid phone number')
+      return false
+    }
+    setPhoneError('')
+    return true
+  }
+
+  const validateName = (value: string) => {
+    if (!value.trim()) {
+      setNameError('Name is required')
+      return false
+    }
+    if (value.trim().length < 2) {
+      setNameError('Name must be at least 2 characters')
+      return false
+    }
+    if (value.trim().length > 50) {
+      setNameError('Name must be less than 50 characters')
+      return false
+    }
+    setNameError('')
+    return true
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPhone(value)
+    if (touched.phone) {
+      validatePhone(value)
+    }
+  }
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setName(value)
+    if (touched.name) {
+      validateName(value)
+    }
+  }
+
+  const handleBlur = (field: 'phone' | 'name') => {
+    setTouched({ ...touched, [field]: true })
+    if (field === 'phone') {
+      validatePhone(phone)
+    } else {
+      validateName(name)
+    }
+  }
+
+  const isPhoneValid = phoneError === '' && phone.trim().length > 0
+  const isNameValid = nameError === '' && name.trim().length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
-
+    
+    setTouched({ phone: true, name: true })
+    const isPhoneValid = validatePhone(phone)
+    const isNameValid = validateName(name)
+    
+    if (!isPhoneValid || !isNameValid) {
+      return
+    }
+    
     const result = await login(phone, name)
     if (result.success) {
-      setSuccess('Welcome! 🎉')
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1000)
+      router.push('/dashboard')
     } else {
       setError(result.error || 'Login failed')
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-500 rounded-full mb-4">
-            <span className="text-3xl">💬</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800">Welcome Back</h1>
-          <p className="text-gray-500 mt-2">Sign in to continue chatting</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#e8f0f5] p-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4e4ed]/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#c5dde8]/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#dce8ef]/20 rounded-full blur-3xl"></div>
+      
+      <div className="absolute top-20 left-10 w-2.5 h-2.5 bg-[#b8d4e3]/50 rounded-full animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-3 h-3 bg-[#a8ccdd]/40 rounded-full animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-[#c0d8e5]/30 rounded-full animate-pulse delay-500"></div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center">
-            <span className="mr-2">❌</span>
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 flex items-center">
-            <span className="mr-2">✅</span>
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1234567890"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-            />
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-white rounded-xl border border-[#dce8ef]/60 shadow-md shadow-[#c5dde8]/20 p-8 transition-all duration-300">
+          {/* Logo */}
+          <div className="text-center mb-7">
+            <div className="relative inline-block">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#7ab8d4] to-[#5ba3c9] rounded-xl flex items-center justify-center mx-auto shadow-sm shadow-[#7ab8d4]/20">
+                <FaCommentDots className="text-2xl text-white" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-[#2c3e50] mt-4">Welcome back</h1>
+            <p className="text-[#8aa8bc] text-sm mt-1">Sign in to continue chatting</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200/60 text-red-500 px-4 py-2.5 rounded-lg mb-4 text-sm flex items-center gap-2">
+              <FaExclamationCircle className="text-red-400 flex-shrink-0" />
+              {error}
+            </div>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Signing in...
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Phone Input */}
+            <div>
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] z-10 pointer-events-none">
+                  <FaPhone className={`text-sm transition-colors duration-300 ${isFocused.phone ? 'text-[#5ba3c9]' : ''}`} />
+                </div>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  onFocus={() => setIsFocused({ ...isFocused, phone: true })}
+                  onBlur={() => {
+                    setIsFocused({ ...isFocused, phone: false })
+                    handleBlur('phone')
+                  }}
+                  placeholder="Phone Number"
+                  className={`w-full pl-10 pr-3 py-2.5 bg-[#f0f5f8] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#2c3e50] placeholder:text-[#8aa8bc] text-sm ${
+                    touched.phone && phoneError
+                      ? 'border-red-300 focus:border-red-400 focus:ring-red-200/30'
+                      : touched.phone && isPhoneValid
+                      ? 'border-[#7ab8d4] focus:border-[#5ba3c9] focus:ring-[#7ab8d4]/30'
+                      : 'border-[#dce8ef] focus:border-[#7ab8d4] focus:ring-[#7ab8d4]/20'
+                  }`}
+                />
+                <label className={`absolute -top-2 left-3 px-1.5 text-[10px] font-medium transition-all duration-300 bg-white rounded ${
+                  isFocused.phone ? 'text-[#5ba3c9]' : touched.phone && phoneError ? 'text-red-400' : 'text-[#8aa8bc]'
+                }`}>
+                  Phone
+                </label>
+                {touched.phone && isPhoneValid && (
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                    <FaCheckCircle className="text-[#5ba3c9] text-sm" />
+                  </div>
+                )}
+                {touched.phone && phoneError && (
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                    <FaExclamationCircle className="text-red-400 text-sm" />
+                  </div>
+                )}
+              </div>
+              {touched.phone && phoneError && (
+                <p className="text-xs text-red-400 mt-1.5 ml-1">{phoneError}</p>
+              )}
+            </div>
+
+            {/* Name Input */}
+            <div>
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] z-10 pointer-events-none">
+                  <FaUser className={`text-sm transition-colors duration-300 ${isFocused.name ? 'text-[#5ba3c9]' : ''}`} />
+                </div>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={handleNameChange}
+                  onFocus={() => setIsFocused({ ...isFocused, name: true })}
+                  onBlur={() => {
+                    setIsFocused({ ...isFocused, name: false })
+                    handleBlur('name')
+                  }}
+                  placeholder="Your Name"
+                  className={`w-full pl-10 pr-3 py-2.5 bg-[#f0f5f8] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#2c3e50] placeholder:text-[#8aa8bc] text-sm ${
+                    touched.name && nameError
+                      ? 'border-red-300 focus:border-red-400 focus:ring-red-200/30'
+                      : touched.name && isNameValid
+                      ? 'border-[#7ab8d4] focus:border-[#5ba3c9] focus:ring-[#7ab8d4]/30'
+                      : 'border-[#dce8ef] focus:border-[#7ab8d4] focus:ring-[#7ab8d4]/20'
+                  }`}
+                />
+                <label className={`absolute -top-2 left-3 px-1.5 text-[10px] font-medium transition-all duration-300 bg-white rounded ${
+                  isFocused.name ? 'text-[#5ba3c9]' : touched.name && nameError ? 'text-red-400' : 'text-[#8aa8bc]'
+                }`}>
+                  Name
+                </label>
+                {touched.name && isNameValid && (
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                    <FaCheckCircle className="text-[#5ba3c9] text-sm" />
+                  </div>
+                )}
+                {touched.name && nameError && (
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                    <FaExclamationCircle className="text-red-400 text-sm" />
+                  </div>
+                )}
+              </div>
+              {touched.name && nameError && (
+                <p className="text-xs text-red-400 mt-1.5 ml-1">{nameError}</p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#7ab8d4] to-[#5ba3c9] hover:from-[#6aaac7] hover:to-[#4a96b8] text-white py-2.5 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-[#7ab8d4]/20 hover:shadow-md hover:shadow-[#7ab8d4]/30 text-sm"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <FaSpinner className="animate-spin" />
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  Get Started
+                  <FaArrowRight className="transition-transform duration-300" />
+                </span>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-5 text-center">
+            <p className="text-xs text-[#8aa8bc]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-[#5ba3c9] rounded-full animate-pulse"></span>
+                New number? Auto-registered
               </span>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        <p className="text-xs text-gray-400 text-center mt-4">
-          💡 New phone number? You'll be automatically registered
-        </p>
+            </p>
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-1 text-xs text-[#8aa8bc] hover:text-[#5ba3c9] mt-3 transition-colors duration-300"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to home
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

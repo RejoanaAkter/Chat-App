@@ -1,18 +1,13 @@
 export interface User {
-  _id: string;
-  id?: string;
+  id: string;
   name: string;
   phone: string;
-  createdAt?: string;
 }
 
 export interface Message {
   id: string;
   content: string;
-  sender: {
-    _id: string;
-    name: string;
-  };
+  sender: User;
   timestamp: string;
 }
 

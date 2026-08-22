@@ -4,17 +4,29 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import api from './../services/api'
 import { AuthProvider, useAuth } from './../context/AuthContext'
+import { 
+  FaCommentDots, 
+  FaUser, 
+  FaUsers, 
+  FaSearch, 
+  FaPlus, 
+  FaSignOutAlt,
+  FaChevronRight,
+  FaRegComment
+} from 'react-icons/fa'
 
 interface Conversation {
   id: string
   _id?: string
   name?: string
-  participants: { _id: string; name: string; phone?: string }[]
-  lastMessage?: { content: string; timestamp: string }
+  participants?: { _id: string; name: string; phone?: string }[]
+  participant?: { _id: string; name: string; phone?: string }
+  lastMessage?: { text?: string; content?: string; createdAt?: string; timestamp?: string }
 }
 
 interface User {
   _id: string
+  id?: string
   name: string
   phone: string
 }
@@ -44,24 +56,20 @@ function DashboardContent() {
       const response = await api.get('/conversations')
       
       let conversationsData: Conversation[] = []
-      
-      if (Array.isArray(response.data)) {
-        conversationsData = response.data
-      } else if (response.data?.conversations && Array.isArray(response.data.conversations)) {
-        conversationsData = response.data.conversations
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
+      if (response.data?.data && Array.isArray(response.data.data)) {
         conversationsData = response.data.data
+      } else if (Array.isArray(response.data)) {
+        conversationsData = response.data
       }
       
       conversationsData = conversationsData.map((conv: any) => ({
         ...conv,
-        id: conv.id || conv._id || conv.conversationId
+        id: conv.id || conv._id
       }))
       
       setConversations(conversationsData)
     } catch (err: any) {
-      console.error('Error fetching conversations:', err)
-      setError('Failed to load conversations. Please try again.')
+      setError('Failed to load conversations')
     } finally {
       setLoading(false)
     }
@@ -75,87 +83,69 @@ function DashboardContent() {
     setSearching(true)
     try {
       const response = await api.get(`/users/search?search=${query}`)
-      
       let usersData: User[] = []
       if (Array.isArray(response.data)) {
         usersData = response.data
-      } else if (response.data?.users && Array.isArray(response.data.users)) {
-        usersData = response.data.users
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        usersData = response.data.data
       }
       
-      const currentUserId = user?._id
-      usersData = usersData.filter((u: any) => u._id !== currentUserId)
+      const searchLower = query.toLowerCase().trim()
+      const filtered = usersData.filter((u: any) => 
+        u.name?.toLowerCase().includes(searchLower) || 
+        u.phone?.toLowerCase().includes(searchLower)
+      )
       
-      setSearchResults(usersData)
+      const currentUserId = user?._id
+      const final = filtered.filter((u: any) => (u._id || u.id) !== currentUserId)
+      setSearchResults(final)
     } catch (err) {
-      console.error('Error searching users:', err)
+      console.error('Error searching:', err)
     } finally {
       setSearching(false)
     }
   }
 
-  const startDirectConversation = async (userId: string) => {
-    try {
-      const response = await api.post('/conversations', { userId })
-      
-      setShowNewChat(false)
-      setSearchTerm('')
-      setSearchResults([])
-      await fetchConversations()
-      
-      const conversationId = response.data?.id || response.data?.conversation?.id || response.data?._id
-      if (conversationId) {
-        router.push(`/chat/${conversationId}`)
-      } else {
-        alert('Conversation created but failed to get ID')
-      }
-    } catch (err) {
-      console.error('Error starting conversation:', err)
-      alert('Failed to start conversation')
-    }
-  }
-
-  const createGroup = async () => {
-    if (!groupName.trim() || groupParticipants.length === 0) {
-      alert('Please provide group name and at least one participant')
-      return
-    }
-
-    try {
-      const response = await api.post('/conversations/group', {
-        name: groupName,
-        participantIds: groupParticipants.map(p => p._id)
-      })
-      
-      setShowGroupModal(false)
-      setGroupName('')
-      setGroupParticipants([])
-      await fetchConversations()
-      
-      const conversationId = response.data?.id || response.data?.conversation?.id || response.data?._id
-      if (conversationId) {
-        router.push(`/chat/${conversationId}`)
-      } else {
-        alert('Group created but failed to get ID')
-      }
-    } catch (err) {
-      console.error('Error creating group:', err)
-      alert('Failed to create group')
-    }
-  }
-
-  const getConversationName = (conv: Conversation) => {
+  const getConversationName = (conv: any) => {
     if (conv.name) return conv.name
-    const otherParticipants = conv.participants?.filter(p => p._id !== user?._id) || []
-    return otherParticipants.length > 0 ? otherParticipants[0].name : 'Unknown'
+    
+    const participant = conv.participant || conv.participants || []
+    if (Array.isArray(participant)) {
+      const other = participant.filter((p: any) => p._id !== user?._id)
+      if (other.length > 0) return other[0].name || 'Unknown'
+    } else if (participant && typeof participant === 'object') {
+      if (participant._id !== user?._id) return participant.name || 'Unknown'
+    }
+    return 'Unknown'
   }
 
-  const getConversationAvatar = (name: string) => {
+  const getInitials = (name: string) => {
     return name?.charAt(0)?.toUpperCase() || '?'
   }
 
   const getLastMessage = (conv: Conversation) => {
-    return conv.lastMessage?.content || 'No messages yet'
+    return conv.lastMessage?.text || conv.lastMessage?.content || 'No messages yet'
+  }
+
+  const startDirectConversation = async (userId: string) => {
+    try {
+      const response = await api.post('/conversations', { userId })
+      setShowNewChat(false)
+      setSearchTerm('')
+      setSearchResults([])
+      await fetchConversations()
+      const convId = response.data?.id || response.data?._id
+      if (convId) router.push(`/chat/${convId}`)
+    } catch (err) {
+      alert('Failed to start conversation')
+    }
+  }
+
+  const handleConversationClick = (conv: Conversation) => {
+    const convId = conv.id || conv._id
+    if (convId && convId !== 'undefined') {
+      router.push(`/chat/${convId}`)
+    }
   }
 
   const handleLogout = () => {
@@ -163,256 +153,138 @@ function DashboardContent() {
     router.push('/auth/login')
   }
 
-  const handleConversationClick = (conv: Conversation) => {
-    const convId = conv.id || conv._id
-    if (convId && convId !== 'undefined') {
-      router.push(`/chat/${convId}`)
-    } else {
-      alert('This conversation has an invalid ID')
-    }
-  }
-
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-full sm:w-96 bg-white border-r border-gray-200 flex flex-col">
+    <div className="flex h-screen bg-[#e8f0f5]">
+      {/* Sidebar */}
+      <div className="w-[380px] min-w-[380px] bg-white border-r border-[#dce8ef]/60 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+        <div className="p-5 border-b border-[#dce8ef]/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-11 h-11 bg-gradient-to-br from-[#7ab8d4] to-[#5ba3c9] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-[#7ab8d4]/20">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
               <div>
-                <p className="font-semibold text-gray-800 truncate max-w-[120px]">
-                  {user?.name || 'User'}
-                </p>
-                <p className="text-sm text-gray-500 truncate max-w-[120px]">
-                  {user?.phone || ''}
-                </p>
+                <p className="font-semibold text-[#2c3e50]">{user?.name || 'User'}</p>
+                <p className="text-sm text-[#8aa8bc]">{user?.phone || ''}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-500 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg text-sm"
+              className="text-[#8aa8bc] hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
             >
-              Logout
+              <FaSignOutAlt className="text-sm" />
             </button>
           </div>
         </div>
 
-        {/* Buttons */}
+        {/* Actions */}
         <div className="p-4 space-y-2">
           <button
             onClick={() => setShowNewChat(!showNewChat)}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm"
+            className="w-full bg-[#f0f5f8] hover:bg-[#e8f0f5] text-[#2c3e50] py-2 rounded-lg font-medium transition-all duration-300 text-sm flex items-center justify-center gap-2 border border-[#dce8ef]/40"
           >
-            {showNewChat ? '✕ Cancel' : '💬 New Conversation'}
+            <FaPlus className="text-[#5ba3c9] text-xs" />
+            {showNewChat ? 'Cancel' : 'New Conversation'}
           </button>
           <button
             onClick={() => setShowGroupModal(true)}
-            className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-sm"
+            className="w-full bg-[#f0f5f8] hover:bg-[#e8f0f5] text-[#2c3e50] py-2 rounded-lg font-medium transition-all duration-300 text-sm flex items-center justify-center gap-2 border border-[#dce8ef]/40"
           >
-            👥 Create Group
+            <FaUsers className="text-[#5ba3c9] text-xs" />
+            Create Group
           </button>
         </div>
 
         {/* Search */}
         {showNewChat && (
           <div className="px-4 pb-4">
-            <input
-              type="text"
-              placeholder="Search by name or phone..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                searchUsers(e.target.value)
-              }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm"
-            />
+            <div className="relative">
+              <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] text-sm" />
+              <input
+                type="text"
+                placeholder="Search by name or phone..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  searchUsers(e.target.value)
+                }}
+                className="w-full pl-10 pr-4 py-2 bg-[#f0f5f8] border border-[#dce8ef]/60 rounded-lg focus:border-[#7ab8d4] focus:ring-2 focus:ring-[#7ab8d4]/20 outline-none transition-all duration-300 text-sm text-[#2c3e50] placeholder:text-[#8aa8bc]"
+              />
+            </div>
             {searching && (
-              <div className="mt-2 flex justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+              <div className="flex justify-center mt-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#5ba3c9] border-t-transparent"></div>
               </div>
             )}
             {searchResults.length > 0 && (
-              <div className="mt-2 border border-gray-200 rounded-lg max-h-60 overflow-y-auto">
+              <div className="mt-2 border border-[#dce8ef]/60 rounded-lg max-h-48 overflow-y-auto">
                 {searchResults.map((result) => (
                   <div
-                    key={result._id}
-                    onClick={() => startDirectConversation(result._id)}
-                    className="px-4 py-3 hover:bg-purple-50 cursor-pointer flex items-center space-x-3 border-b border-gray-100 last:border-0"
+                    key={result._id || result.id}
+                    onClick={() => startDirectConversation(result._id || result.id)}
+                    className="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#f0f5f8] cursor-pointer transition-colors border-b border-[#dce8ef]/40 last:border-0"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-semibold">
-                      {result.name?.charAt(0)?.toUpperCase() || '?'}
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#7ab8d4]/30 to-[#5ba3c9]/30 rounded-lg flex items-center justify-center text-[#5ba3c9] font-semibold text-sm">
+                      {getInitials(result.name)}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800 text-sm">{result.name}</p>
-                      <p className="text-xs text-gray-500">{result.phone}</p>
+                      <p className="font-medium text-[#2c3e50] text-sm">{result.name}</p>
+                      <p className="text-xs text-[#8aa8bc]">{result.phone}</p>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            {searchTerm && searchResults.length === 0 && !searching && (
-              <p className="text-sm text-gray-500 text-center mt-2">No users found</p>
-            )}
-          </div>
-        )}
-
-        {/* Group Modal */}
-        {showGroupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold mb-4">Create Group</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Group Name
-                  </label>
-                  <input
-                    type="text"
-                    value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
-                    placeholder="Project Team"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Add Participants
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    onChange={(e) => searchUsers(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                  />
-                  {searchResults.length > 0 && (
-                    <div className="mt-2 border border-gray-200 rounded-lg max-h-40 overflow-y-auto">
-                      {searchResults
-                        .filter(u => u._id !== user?._id)
-                        .filter(u => !groupParticipants.find(p => p._id === u._id))
-                        .map((result) => (
-                          <div
-                            key={result._id}
-                            onClick={() => {
-                              setGroupParticipants([...groupParticipants, result])
-                              setSearchResults([])
-                            }}
-                            className="px-4 py-2 hover:bg-purple-50 cursor-pointer flex items-center space-x-3 border-b border-gray-100 last:border-0"
-                          >
-                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold">
-                              {result.name?.charAt(0)?.toUpperCase() || '?'}
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">{result.name}</p>
-                              <p className="text-xs text-gray-500">{result.phone}</p>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-                {groupParticipants.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {groupParticipants.map((p) => (
-                      <span
-                        key={p._id}
-                        className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center"
-                      >
-                        {p.name}
-                        <button
-                          onClick={() =>
-                            setGroupParticipants(
-                              groupParticipants.filter(g => g._id !== p._id)
-                            )
-                          }
-                          className="ml-2 text-purple-500 hover:text-purple-700"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="flex space-x-2 pt-2">
-                  <button
-                    onClick={() => {
-                      setShowGroupModal(false)
-                      setGroupName('')
-                      setGroupParticipants([])
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={createGroup}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity"
-                  >
-                    Create Group
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
         {/* Conversations List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-3 py-2">
+          <p className="text-xs text-[#8aa8bc] font-medium px-3 py-2">Chats</p>
           {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <div className="flex items-center justify-center h-20">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#5ba3c9] border-t-transparent"></div>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-full text-red-500 p-4">
-              <p className="text-center">{error}</p>
-              <button
-                onClick={fetchConversations}
-                className="mt-2 text-purple-600 hover:text-purple-700 text-sm"
-              >
+            <div className="flex flex-col items-center justify-center h-40 text-[#8aa8bc] p-4">
+              <p className="text-center text-sm">{error}</p>
+              <button onClick={fetchConversations} className="text-[#5ba3c9] text-sm mt-2 hover:underline">
                 Try again
               </button>
             </div>
           ) : conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
-              <p className="text-4xl mb-2">💭</p>
-              <p className="text-center font-medium">No conversations yet</p>
-              <p className="text-sm text-center">Start a new conversation or create a group!</p>
+            <div className="flex flex-col items-center justify-center h-40 text-[#8aa8bc]">
+              <FaRegComment className="text-3xl mb-2 opacity-40" />
+              <p className="text-sm font-medium">No conversations yet</p>
+              <p className="text-xs">Start a new conversation!</p>
             </div>
           ) : (
             conversations.map((conv) => {
               const name = getConversationName(conv)
               const convId = conv.id || conv._id
+              const lastMsg = getLastMessage(conv)
               return (
                 <div
                   key={convId}
                   onClick={() => handleConversationClick(conv)}
-                  className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-[#f0f5f8] cursor-pointer transition-all duration-200"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-                      {getConversationAvatar(name)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-semibold text-gray-800 truncate">
-                          {name}
-                        </p>
-                        {conv.lastMessage?.timestamp && (
-                          <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                            {new Date(conv.lastMessage.timestamp).toLocaleTimeString(
-                              [],
-                              { hour: '2-digit', minute: '2-digit' }
-                            )}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500 truncate">
-                        {getLastMessage(conv)}
-                      </p>
-                    </div>
+                  <div className="w-11 h-11 bg-gradient-to-br from-[#7ab8d4]/30 to-[#5ba3c9]/30 rounded-xl flex items-center justify-center text-[#5ba3c9] font-semibold flex-shrink-0">
+                    {getInitials(name)}
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-[#2c3e50] truncate text-sm">{name}</p>
+                      {conv.lastMessage?.createdAt && (
+                        <span className="text-xs text-[#8aa8bc] whitespace-nowrap ml-2">
+                          {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-[#8aa8bc] truncate">{lastMsg}</p>
+                  </div>
+                  <FaChevronRight className="text-[#8aa8bc] text-xs opacity-40" />
                 </div>
               )
             })
@@ -420,11 +292,14 @@ function DashboardContent() {
         </div>
       </div>
 
-      <div className="hidden sm:flex flex-1 items-center justify-center bg-gray-50">
+      {/* Main Content - Empty State */}
+      <div className="flex-1 flex items-center justify-center bg-[#e8f0f5]">
         <div className="text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <h2 className="text-2xl font-semibold text-gray-700">Your messages</h2>
-          <p className="text-gray-500 mt-2">Select a conversation to start chatting</p>
+          <div className="w-16 h-16 bg-gradient-to-br from-[#7ab8d4]/20 to-[#5ba3c9]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FaCommentDots className="text-3xl text-[#5ba3c9]" />
+          </div>
+          <h2 className="text-xl font-semibold text-[#2c3e50]">Your messages</h2>
+          <p className="text-[#8aa8bc] text-sm mt-1">Select a conversation to start chatting</p>
         </div>
       </div>
     </div>
