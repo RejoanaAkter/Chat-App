@@ -53,7 +53,6 @@ function DashboardContent() {
         conversationsData = response.data.data
       }
       
-      // Ensure each conversation has an id
       conversationsData = conversationsData.map((conv: any) => ({
         ...conv,
         id: conv.id || conv._id || conv.conversationId

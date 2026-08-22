@@ -35,28 +35,3 @@ export interface ApiError {
   message: string;
   status?: number;
 }
-
-export interface ConversationsResponse {
-  conversations: Conversation[];
-}
-
-export interface MessagesResponse {
-  messages: Message[];
-  conversation?: Conversation;
-}
-
-export interface UsersSearchResponse {
-  users: User[];
-}
-
-export interface CreateConversationResponse {
-  id: string;
-  conversation?: Conversation;
-}
-
-export interface SendMessageResponse {
-  id: string;
-  content: string;
-  sender: User;
-  timestamp: string;
-}

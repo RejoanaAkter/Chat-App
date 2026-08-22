@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         setUser(JSON.parse(storedUser));
         setIsAuthenticated(true);
-      } catch {
+      } catch (e) {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
       }
@@ -43,14 +43,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = response.data;
       
       if (data.token && data.user) {
+        const userData: User = {
+          _id: data.user._id || data.user.id,
+          name: data.user.name,
+          phone: data.user.phone,
+          createdAt: data.user.createdAt,
+        };
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
         setIsAuthenticated(true);
         return { success: true };
-      } else {
-        return { success: false, error: 'Invalid response from server' };
       }
+      return { success: false, error: 'Invalid response from server' };
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
       setError(errorMessage);

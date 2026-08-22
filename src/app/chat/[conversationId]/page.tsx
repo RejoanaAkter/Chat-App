@@ -165,12 +165,32 @@ function ChatContent() {
     scrollToBottom()
 
     try {
-      // ✅ CORRECT: Use /messages endpoint
-      console.log('📤 Sending to /messages endpoint')
-      const response = await api.post('/messages', {
-        conversationId: conversationId,
-        content: messageContent
-      })
+      let response;
+      
+      // ✅ Try different formats
+      const formats = [
+        { conversationId, text: messageContent },
+        { conversationId, content: messageContent },
+        { conversationId, message: messageContent },
+      ];
+      
+      let lastError: any = null;
+      
+      for (const format of formats) {
+        try {
+          console.log('📤 Trying format:', format)
+          response = await api.post('/messages', format)
+          console.log('✅ Success with format:', format)
+          break
+        } catch (err: any) {
+          lastError = err
+          console.log('❌ Failed:', err.response?.status, err.response?.data)
+        }
+      }
+      
+      if (!response) {
+        throw lastError
+      }
       
       console.log('✅ Message sent:', response.data)
       
@@ -202,7 +222,7 @@ function ChatContent() {
         minute: '2-digit' 
       })
     } catch {
-      return 'Invalid time'
+      return 'Invalid Date'
     }
   }
 
@@ -272,6 +292,9 @@ function ChatContent() {
             messages.map((message, index) => {
               const isOwn = message.sender?._id === user?._id
               const isTemp = message.id?.startsWith('temp-')
+              const senderName = message.sender?.name || 'Unknown'
+              const time = message.timestamp ? formatTime(message.timestamp) : 'Invalid Date'
+              
               return (
                 <div
                   key={message.id || index}
@@ -280,7 +303,7 @@ function ChatContent() {
                   <div className={`max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
                     {!isOwn && (
                       <p className="text-xs text-gray-500 mb-1 ml-1">
-                        {message.sender?.name || 'Unknown'}
+                        {senderName}
                       </p>
                     )}
                     <div
@@ -296,7 +319,7 @@ function ChatContent() {
                           isOwn ? 'text-purple-100' : 'text-gray-400'
                         }`}
                       >
-                        {formatTime(message.timestamp)}
+                        {time}
                         {isTemp && ' ⏳ Sending...'}
                       </p>
                     </div>
