@@ -12,7 +12,9 @@ import {
   FaPlus, 
   FaSignOutAlt,
   FaChevronRight,
-  FaRegComment
+  FaRegComment,
+  FaTimes,
+  FaUserPlus
 } from 'react-icons/fa'
 
 interface Conversation {
@@ -43,6 +45,9 @@ function DashboardContent() {
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [groupName, setGroupName] = useState('')
   const [groupParticipants, setGroupParticipants] = useState<User[]>([])
+  const [groupSearchTerm, setGroupSearchTerm] = useState('')
+  const [groupSearchResults, setGroupSearchResults] = useState<User[]>([])
+  const [groupSearching, setGroupSearching] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -106,6 +111,41 @@ function DashboardContent() {
     }
   }
 
+  // ✅ Group search function
+  const searchGroupUsers = async (query: string) => {
+    if (!query.trim()) {
+      setGroupSearchResults([])
+      return
+    }
+    setGroupSearching(true)
+    try {
+      const response = await api.get(`/users/search?search=${query}`)
+      let usersData: User[] = []
+      if (Array.isArray(response.data)) {
+        usersData = response.data
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        usersData = response.data.data
+      }
+      
+      const searchLower = query.toLowerCase().trim()
+      const filtered = usersData.filter((u: any) => 
+        u.name?.toLowerCase().includes(searchLower) || 
+        u.phone?.toLowerCase().includes(searchLower)
+      )
+      
+      const currentUserId = user?._id
+      const final = filtered.filter((u: any) => 
+        (u._id || u.id) !== currentUserId && 
+        !groupParticipants.find(p => (p._id || p.id) === (u._id || u.id))
+      )
+      setGroupSearchResults(final)
+    } catch (err) {
+      console.error('Error searching group users:', err)
+    } finally {
+      setGroupSearching(false)
+    }
+  }
+
   const getConversationName = (conv: any) => {
     if (conv.name) return conv.name
     
@@ -145,6 +185,36 @@ function DashboardContent() {
     const convId = conv.id || conv._id
     if (convId && convId !== 'undefined') {
       router.push(`/chat/${convId}`)
+    }
+  }
+
+  // ✅ Create Group function
+  const createGroup = async () => {
+    if (!groupName.trim() || groupParticipants.length === 0) {
+      alert('Please provide group name and at least one participant')
+      return
+    }
+
+    try {
+      const response = await api.post('/conversations/group', {
+        name: groupName,
+        participantIds: groupParticipants.map(p => p._id || p.id)
+      })
+      console.log('👥 Group Created:', response.data)
+      setShowGroupModal(false)
+      setGroupName('')
+      setGroupParticipants([])
+      setGroupSearchTerm('')
+      setGroupSearchResults([])
+      await fetchConversations()
+      
+      const convId = response.data?.id || response.data?._id || response.data?.conversation?.id
+      if (convId) {
+        router.push(`/chat/${convId}`)
+      }
+    } catch (err) {
+      console.error('Error creating group:', err)
+      alert('Failed to create group. Please try again.')
     }
   }
 
@@ -302,6 +372,152 @@ function DashboardContent() {
           <p className="text-[#8aa8bc] text-sm mt-1">Select a conversation to start chatting</p>
         </div>
       </div>
+
+      {/* ✅ Group Modal */}
+      {showGroupModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-xl border border-[#dce8ef]/60 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-[#dce8ef]/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#7ab8d4] to-[#5ba3c9] rounded-lg flex items-center justify-center text-white">
+                  <FaUsers className="text-sm" />
+                </div>
+                <h2 className="text-lg font-semibold text-[#2c3e50]">Create Group</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setShowGroupModal(false)
+                  setGroupName('')
+                  setGroupParticipants([])
+                  setGroupSearchTerm('')
+                  setGroupSearchResults([])
+                }}
+                className="text-[#8aa8bc] hover:text-red-500 transition-colors p-1"
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4">
+              {/* Group Name */}
+              <div>
+                <label className="block text-sm font-medium text-[#2c3e50] mb-1.5">
+                  Group Name
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Enter group name..."
+                  className="w-full px-4 py-2.5 bg-[#f0f5f8] border border-[#dce8ef]/60 rounded-lg focus:border-[#7ab8d4] focus:ring-2 focus:ring-[#7ab8d4]/20 outline-none transition-all duration-300 text-sm text-[#2c3e50] placeholder:text-[#8aa8bc]"
+                />
+              </div>
+
+              {/* Add Participants */}
+              <div>
+                <label className="block text-sm font-medium text-[#2c3e50] mb-1.5">
+                  Add Participants
+                </label>
+                <div className="relative">
+                  <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] text-sm" />
+                  <input
+                    type="text"
+                    value={groupSearchTerm}
+                    onChange={(e) => {
+                      setGroupSearchTerm(e.target.value)
+                      searchGroupUsers(e.target.value)
+                    }}
+                    placeholder="Search users..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#f0f5f8] border border-[#dce8ef]/60 rounded-lg focus:border-[#7ab8d4] focus:ring-2 focus:ring-[#7ab8d4]/20 outline-none transition-all duration-300 text-sm text-[#2c3e50] placeholder:text-[#8aa8bc]"
+                  />
+                </div>
+                {groupSearching && (
+                  <div className="flex justify-center mt-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#5ba3c9] border-t-transparent"></div>
+                  </div>
+                )}
+                {groupSearchResults.length > 0 && (
+                  <div className="mt-2 border border-[#dce8ef]/60 rounded-lg max-h-40 overflow-y-auto">
+                    {groupSearchResults.map((result) => (
+                      <div
+                        key={result._id || result.id}
+                        onClick={() => {
+                          setGroupParticipants([...groupParticipants, result])
+                          setGroupSearchResults([])
+                          setGroupSearchTerm('')
+                        }}
+                        className="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#f0f5f8] cursor-pointer transition-colors border-b border-[#dce8ef]/40 last:border-0"
+                      >
+                        <div className="w-8 h-8 bg-gradient-to-br from-[#7ab8d4]/30 to-[#5ba3c9]/30 rounded-lg flex items-center justify-center text-[#5ba3c9] font-semibold text-sm">
+                          {getInitials(result.name)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-[#2c3e50] text-sm">{result.name}</p>
+                          <p className="text-xs text-[#8aa8bc]">{result.phone}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected Participants */}
+              {groupParticipants.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-[#2c3e50] mb-1.5">
+                    Selected ({groupParticipants.length})
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {groupParticipants.map((p) => (
+                      <span
+                        key={p._id || p.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#7ab8d4]/10 to-[#5ba3c9]/10 border border-[#7ab8d4]/30 rounded-lg text-sm text-[#2c3e50]"
+                      >
+                        <span>{p.name}</span>
+                        <button
+                          onClick={() =>
+                            setGroupParticipants(
+                              groupParticipants.filter(g => (g._id || g.id) !== (p._id || p.id))
+                            )
+                          }
+                          className="text-[#8aa8bc] hover:text-red-500 transition-colors"
+                        >
+                          <FaTimes className="text-xs" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-[#dce8ef]/40">
+              <button
+                onClick={() => {
+                  setShowGroupModal(false)
+                  setGroupName('')
+                  setGroupParticipants([])
+                  setGroupSearchTerm('')
+                  setGroupSearchResults([])
+                }}
+                className="px-4 py-2 text-sm text-[#8aa8bc] hover:text-[#2c3e50] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createGroup}
+                disabled={!groupName.trim() || groupParticipants.length === 0}
+                className="px-5 py-2 bg-gradient-to-r from-[#7ab8d4] to-[#5ba3c9] hover:from-[#6aaac7] hover:to-[#4a96b8] text-white rounded-lg text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-[#7ab8d4]/20"
+              >
+                Create Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
