@@ -8,11 +8,10 @@
   }
 
   body {
-    @apply bg-[#f0f4f8] text-[#1a2332];
+    @apply bg-[#c8d6e0] text-[#0a1a2a];
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -23,179 +22,68 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-[#c5cdd8] rounded-full;
+    @apply bg-[#8aa8bc] rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-[#a8b3c4];
+    @apply bg-[#6a8aa0];
   }
 }
 
 @layer components {
-  /* Glass Morphism */
-  .glass {
-    @apply bg-white/80 backdrop-blur-lg border border-white/30 shadow-lg;
-  }
-
-  .glass-dark {
-    @apply bg-[#1a2332]/80 backdrop-blur-lg border border-white/10 shadow-lg;
-  }
-
-  /* Gradients - Soothing */
-  .gradient-primary {
-    @apply bg-gradient-to-br from-[#4facfe] to-[#43e97b];
-  }
-
-  .gradient-secondary {
-    @apply bg-gradient-to-br from-[#a8c0ff] to-[#3f2b96];
-  }
-
-  .gradient-warm {
-    @apply bg-gradient-to-br from-[#f093fb] to-[#f5576c];
-  }
-
-  .gradient-soft {
-    @apply bg-gradient-to-br from-[#e0c3fc] to-[#8ec5fc];
-  }
-
-  /* Cards */
   .card {
-    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100/50;
+    @apply bg-white rounded-xl border border-[#b0c8d8]/60 shadow-sm hover:shadow-md transition-all duration-300;
   }
 
-  .card-hover {
-    @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
-  }
-
-  /* Buttons */
   .btn-primary {
-    @apply bg-gradient-to-r from-[#4facfe] to-[#43e97b] text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300;
+    @apply bg-gradient-to-r from-[#3a7a9e] to-[#1a5a7e] hover:from-[#2a6a8e] hover:to-[#0a4a6e] text-white px-6 py-2.5 rounded-lg font-medium transition-all duration-300 hover:shadow-lg;
   }
 
   .btn-secondary {
-    @apply bg-[#e8edf3] text-[#1a2332] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#d5dde7] hover:shadow-md transition-all duration-300;
+    @apply bg-[#c8d6e0] hover:bg-[#b0c8d8] text-[#0a1a2a] px-6 py-2.5 rounded-lg font-medium transition-all duration-300;
   }
 
   .btn-outline {
-    @apply border-2 border-[#4facfe] text-[#4facfe] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#4facfe] hover:text-white transition-all duration-300;
+    @apply border-2 border-[#3a7a9e] text-[#3a7a9e] px-6 py-2.5 rounded-lg font-medium hover:bg-[#3a7a9e] hover:text-white transition-all duration-300;
   }
 
-  /* Inputs */
   .input-modern {
-    @apply w-full px-4 py-3 bg-[#f7f9fc] border-2 border-transparent rounded-xl focus:border-[#4facfe] focus:ring-4 focus:ring-[#4facfe]/20 outline-none transition-all duration-300 text-[#1a2332] placeholder:text-[#94a3b8];
+    @apply w-full px-4 py-3 bg-[#d8e4ee] border border-[#b0c8d8] rounded-xl focus:border-[#3a7a9e] focus:ring-4 focus:ring-[#3a7a9e]/20 outline-none transition-all duration-300 text-[#0a1a2a] placeholder:text-[#6a8aa0];
   }
 
-  /* Animations */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes pulse-soft {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .animate-fadeInUp {
-    animation: fadeInUp 0.6s ease-out forwards;
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.4s ease-out forwards;
-  }
-
-  .animate-slideInRight {
-    animation: slideInRight 0.5s ease-out forwards;
-  }
-
-  .animate-pulse-soft {
-    animation: pulse-soft 2s ease-in-out infinite;
-  }
-
-  /* Message Bubbles */
   .message-own {
-    @apply bg-gradient-to-r from-[#4facfe] to-[#43e97b] text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-md;
+    @apply bg-gradient-to-r from-[#3a7a9e] to-[#1a5a7e] text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-md;
   }
 
   .message-other {
-    @apply bg-white border border-gray-100/80 text-[#1a2332] rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm;
+    @apply bg-white border border-[#b0c8d8]/80 text-[#0a1a2a] rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm;
   }
 
-  /* Status Indicator */
-  .status-dot {
-    @apply w-2.5 h-2.5 rounded-full;
-  }
-
-  .status-online {
-    @apply bg-emerald-400;
-  }
-
-  .status-offline {
-    @apply bg-gray-300;
-  }
-
-  .status-away {
-    @apply bg-amber-400;
-  }
-
-  /* Typography */
   .heading-1 {
-    @apply text-3xl md:text-4xl font-bold text-[#1a2332];
+    @apply text-3xl md:text-4xl font-bold text-[#0a1a2a];
   }
 
   .heading-2 {
-    @apply text-2xl md:text-3xl font-semibold text-[#1a2332];
+    @apply text-2xl md:text-3xl font-semibold text-[#0a1a2a];
   }
 
   .heading-3 {
-    @apply text-xl font-semibold text-[#1a2332];
+    @apply text-xl font-semibold text-[#0a1a2a];
   }
 
   .text-muted {
-    @apply text-[#64748b];
+    @apply text-[#4a6a7e];
   }
 
-  /* Sidebar Item */
   .sidebar-item {
-    @apply flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-[#f0f4f8] cursor-pointer transition-all duration-200;
+    @apply flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-[#c8d6e0] cursor-pointer transition-all duration-200;
   }
 
   .sidebar-item-active {
-    @apply bg-[#e8edf3] shadow-sm;
+    @apply bg-[#b0c8d8] shadow-sm;
   }
 
-  /* Message Input */
   .message-input {
-    @apply flex-1 px-4 py-2.5 bg-[#f7f9fc] border-2 border-transparent rounded-2xl focus:border-[#4facfe] focus:ring-4 focus:ring-[#4facfe]/20 outline-none transition-all duration-300 text-[#1a2332] placeholder:text-[#94a3b8];
+    @apply flex-1 px-4 py-2.5 bg-[#d8e4ee] border-2 border-transparent rounded-2xl focus:border-[#3a7a9e] focus:ring-4 focus:ring-[#3a7a9e]/20 outline-none transition-all duration-300 text-[#0a1a2a] placeholder:text-[#6a8aa0];
   }
 }

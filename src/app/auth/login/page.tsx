@@ -98,27 +98,27 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#e8f0f5] p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#c8d6e0] p-4 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4e4ed]/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#c5dde8]/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#dce8ef]/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#b0c8d8]/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8aa8bc]/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#b0c8d8]/20 rounded-full blur-3xl"></div>
       
-      <div className="absolute top-20 left-10 w-2.5 h-2.5 bg-[#b8d4e3]/50 rounded-full animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-3 h-3 bg-[#a8ccdd]/40 rounded-full animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-[#c0d8e5]/30 rounded-full animate-pulse delay-500"></div>
+      <div className="absolute top-20 left-10 w-2.5 h-2.5 bg-[#8aa8bc]/50 rounded-full animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-3 h-3 bg-[#6a8aa0]/40 rounded-full animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-[#8aa8bc]/30 rounded-full animate-pulse delay-500"></div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white rounded-xl border border-[#dce8ef]/60 shadow-md shadow-[#c5dde8]/20 p-8 transition-all duration-300">
+        <div className="bg-white rounded-xl border border-[#b0c8d8]/60 shadow-md shadow-[#8aa8bc]/20 p-8 transition-all duration-300">
           {/* Logo */}
           <div className="text-center mb-7">
             <div className="relative inline-block">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#7ab8d4] to-[#5ba3c9] rounded-xl flex items-center justify-center mx-auto shadow-sm shadow-[#7ab8d4]/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#3a7a9e] to-[#1a5a7e] rounded-xl flex items-center justify-center mx-auto shadow-sm shadow-[#3a7a9e]/20">
                 <FaCommentDots className="text-2xl text-white" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-[#2c3e50] mt-4">Welcome back</h1>
-            <p className="text-[#8aa8bc] text-sm mt-1">Sign in to continue chatting</p>
+            <h1 className="text-2xl font-bold text-[#0a1a2a] mt-4">Welcome back</h1>
+            <p className="text-[#4a6a7e] text-sm mt-1">Sign in to continue chatting</p>
           </div>
 
           {/* Error Message */}
@@ -133,8 +133,8 @@ function LoginForm() {
             {/* Phone Input */}
             <div>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] z-10 pointer-events-none">
-                  <FaPhone className={`text-sm transition-colors duration-300 ${isFocused.phone ? 'text-[#5ba3c9]' : ''}`} />
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4a6a7e] z-10 pointer-events-none">
+                  <FaPhone className={`text-sm transition-colors duration-300 ${isFocused.phone ? 'text-[#3a7a9e]' : ''}`} />
                 </div>
                 <input
                   type="tel"
@@ -146,22 +146,22 @@ function LoginForm() {
                     handleBlur('phone')
                   }}
                   placeholder="Phone Number"
-                  className={`w-full pl-10 pr-3 py-2.5 bg-[#f0f5f8] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#2c3e50] placeholder:text-[#8aa8bc] text-sm ${
+                  className={`w-full pl-10 pr-3 py-2.5 bg-[#d8e4ee] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#0a1a2a] placeholder:text-[#6a8aa0] text-sm ${
                     touched.phone && phoneError
                       ? 'border-red-300 focus:border-red-400 focus:ring-red-200/30'
                       : touched.phone && isPhoneValid
-                      ? 'border-[#7ab8d4] focus:border-[#5ba3c9] focus:ring-[#7ab8d4]/30'
-                      : 'border-[#dce8ef] focus:border-[#7ab8d4] focus:ring-[#7ab8d4]/20'
+                      ? 'border-[#3a7a9e] focus:border-[#3a7a9e] focus:ring-[#3a7a9e]/30'
+                      : 'border-[#b0c8d8] focus:border-[#3a7a9e] focus:ring-[#3a7a9e]/20'
                   }`}
                 />
                 <label className={`absolute -top-2 left-3 px-1.5 text-[10px] font-medium transition-all duration-300 bg-white rounded ${
-                  isFocused.phone ? 'text-[#5ba3c9]' : touched.phone && phoneError ? 'text-red-400' : 'text-[#8aa8bc]'
+                  isFocused.phone ? 'text-[#3a7a9e]' : touched.phone && phoneError ? 'text-red-400' : 'text-[#4a6a7e]'
                 }`}>
                   Phone
                 </label>
                 {touched.phone && isPhoneValid && (
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                    <FaCheckCircle className="text-[#5ba3c9] text-sm" />
+                    <FaCheckCircle className="text-[#3a7a9e] text-sm" />
                   </div>
                 )}
                 {touched.phone && phoneError && (
@@ -178,8 +178,8 @@ function LoginForm() {
             {/* Name Input */}
             <div>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8aa8bc] z-10 pointer-events-none">
-                  <FaUser className={`text-sm transition-colors duration-300 ${isFocused.name ? 'text-[#5ba3c9]' : ''}`} />
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4a6a7e] z-10 pointer-events-none">
+                  <FaUser className={`text-sm transition-colors duration-300 ${isFocused.name ? 'text-[#3a7a9e]' : ''}`} />
                 </div>
                 <input
                   type="text"
@@ -191,22 +191,22 @@ function LoginForm() {
                     handleBlur('name')
                   }}
                   placeholder="Your Name"
-                  className={`w-full pl-10 pr-3 py-2.5 bg-[#f0f5f8] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#2c3e50] placeholder:text-[#8aa8bc] text-sm ${
+                  className={`w-full pl-10 pr-3 py-2.5 bg-[#d8e4ee] border rounded-lg focus:bg-white focus:ring-2 outline-none transition-all duration-300 text-[#0a1a2a] placeholder:text-[#6a8aa0] text-sm ${
                     touched.name && nameError
                       ? 'border-red-300 focus:border-red-400 focus:ring-red-200/30'
                       : touched.name && isNameValid
-                      ? 'border-[#7ab8d4] focus:border-[#5ba3c9] focus:ring-[#7ab8d4]/30'
-                      : 'border-[#dce8ef] focus:border-[#7ab8d4] focus:ring-[#7ab8d4]/20'
+                      ? 'border-[#3a7a9e] focus:border-[#3a7a9e] focus:ring-[#3a7a9e]/30'
+                      : 'border-[#b0c8d8] focus:border-[#3a7a9e] focus:ring-[#3a7a9e]/20'
                   }`}
                 />
                 <label className={`absolute -top-2 left-3 px-1.5 text-[10px] font-medium transition-all duration-300 bg-white rounded ${
-                  isFocused.name ? 'text-[#5ba3c9]' : touched.name && nameError ? 'text-red-400' : 'text-[#8aa8bc]'
+                  isFocused.name ? 'text-[#3a7a9e]' : touched.name && nameError ? 'text-red-400' : 'text-[#4a6a7e]'
                 }`}>
                   Name
                 </label>
                 {touched.name && isNameValid && (
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                    <FaCheckCircle className="text-[#5ba3c9] text-sm" />
+                    <FaCheckCircle className="text-[#3a7a9e] text-sm" />
                   </div>
                 )}
                 {touched.name && nameError && (
@@ -224,7 +224,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#7ab8d4] to-[#5ba3c9] hover:from-[#6aaac7] hover:to-[#4a96b8] text-white py-2.5 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-[#7ab8d4]/20 hover:shadow-md hover:shadow-[#7ab8d4]/30 text-sm"
+              className="w-full bg-gradient-to-r from-[#3a7a9e] to-[#1a5a7e] hover:from-[#2a6a8e] hover:to-[#0a4a6e] text-white py-2.5 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-[#3a7a9e]/20 hover:shadow-md text-sm"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -242,15 +242,15 @@ function LoginForm() {
 
           {/* Footer */}
           <div className="mt-5 text-center">
-            <p className="text-xs text-[#8aa8bc]">
+            <p className="text-xs text-[#4a6a7e]">
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-[#5ba3c9] rounded-full animate-pulse"></span>
+                <span className="w-1.5 h-1.5 bg-[#3a7a9e] rounded-full animate-pulse"></span>
                 New number? Auto-registered
               </span>
             </p>
             <Link 
               href="/" 
-              className="inline-flex items-center gap-1 text-xs text-[#8aa8bc] hover:text-[#5ba3c9] mt-3 transition-colors duration-300"
+              className="inline-flex items-center gap-1 text-xs text-[#4a6a7e] hover:text-[#3a7a9e] mt-3 transition-colors duration-300"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
