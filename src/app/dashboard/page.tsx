@@ -438,11 +438,151 @@ function DashboardContent() {
       </div>
 
       {/* Group Modal - Add this if not already present */}
-      {showGroupModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          {/* ... Group modal content ... */}
+    {/* Group Modal */}
+{showGroupModal && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[999] p-4">
+    <div className="bg-white rounded-xl border border-[#b0c8d8]/60 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal Header */}
+      <div className="flex items-center justify-between p-5 border-b border-[#b0c8d8]/40">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#3a7a9e] to-[#1a5a7e] rounded-lg flex items-center justify-center text-white">
+            <FaUsers className="text-sm" />
+          </div>
+          <h2 className="text-lg font-semibold text-[#0a1a2a]">Create Group</h2>
         </div>
-      )}
+        <button
+          onClick={() => {
+            setShowGroupModal(false)
+            setGroupName('')
+            setGroupParticipants([])
+            setGroupSearchTerm('')
+            setGroupSearchResults([])
+          }}
+          className="text-[#4a6a7e] hover:text-red-500 transition-colors p-1"
+        >
+          <FaTimes className="text-lg" />
+        </button>
+      </div>
+
+      {/* Modal Body */}
+      <div className="p-5 space-y-4">
+        {/* Group Name */}
+        <div>
+          <label className="block text-sm font-medium text-[#0a1a2a] mb-1.5">
+            Group Name
+          </label>
+          <input
+            type="text"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Enter group name..."
+            className="w-full px-4 py-2.5 bg-[#d8e4ee] border border-[#b0c8d8]/60 rounded-lg focus:border-[#3a7a9e] focus:ring-2 focus:ring-[#3a7a9e]/20 outline-none transition-all duration-300 text-sm text-[#0a1a2a] placeholder:text-[#6a8aa0]"
+          />
+        </div>
+
+        {/* Add Participants */}
+        <div>
+          <label className="block text-sm font-medium text-[#0a1a2a] mb-1.5">
+            Add Participants
+          </label>
+          <div className="relative">
+            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4a6a7e] text-sm" />
+            <input
+              type="text"
+              value={groupSearchTerm}
+              onChange={(e) => {
+                setGroupSearchTerm(e.target.value)
+                searchGroupUsers(e.target.value)
+              }}
+              placeholder="Search users..."
+              className="w-full pl-10 pr-4 py-2.5 bg-[#d8e4ee] border border-[#b0c8d8]/60 rounded-lg focus:border-[#3a7a9e] focus:ring-2 focus:ring-[#3a7a9e]/20 outline-none transition-all duration-300 text-sm text-[#0a1a2a] placeholder:text-[#6a8aa0]"
+            />
+          </div>
+          {groupSearching && (
+            <div className="flex justify-center mt-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#3a7a9e] border-t-transparent"></div>
+            </div>
+          )}
+          {groupSearchResults.length > 0 && (
+            <div className="mt-2 border border-[#b0c8d8]/60 rounded-lg max-h-40 overflow-y-auto">
+              {groupSearchResults.map((result) => (
+                <div
+                  key={result._id || result.id}
+                  onClick={() => {
+                    setGroupParticipants([...groupParticipants, result])
+                    setGroupSearchResults([])
+                    setGroupSearchTerm('')
+                  }}
+                  className="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#c8d6e0] cursor-pointer transition-colors border-b border-[#b0c8d8]/40 last:border-0"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#3a7a9e]/30 to-[#1a5a7e]/30 rounded-lg flex items-center justify-center text-[#3a7a9e] font-semibold text-sm">
+                    {getInitials(result.name)}
+                  </div>
+                  <div>
+                    <p className="font-medium text-[#0a1a2a] text-sm">{result.name}</p>
+                    <p className="text-xs text-[#4a6a7e]">{result.phone}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Selected Participants */}
+        {groupParticipants.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-[#0a1a2a] mb-1.5">
+              Selected ({groupParticipants.length})
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {groupParticipants.map((p) => (
+                <span
+                  key={p._id || p.id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#3a7a9e]/10 to-[#1a5a7e]/10 border border-[#3a7a9e]/30 rounded-lg text-sm text-[#0a1a2a]"
+                >
+                  <span>{p.name}</span>
+                  <button
+                    onClick={() =>
+                      setGroupParticipants(
+                        groupParticipants.filter(g => (g._id || g.id) !== (p._id || p.id))
+                      )
+                    }
+                    className="text-[#4a6a7e] hover:text-red-500 transition-colors"
+                  >
+                    <FaTimes className="text-xs" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal Footer */}
+      <div className="flex items-center justify-end gap-3 p-5 border-t border-[#b0c8d8]/40">
+        <button
+          onClick={() => {
+            setShowGroupModal(false)
+            setGroupName('')
+            setGroupParticipants([])
+            setGroupSearchTerm('')
+            setGroupSearchResults([])
+          }}
+          className="px-4 py-2 text-sm text-[#4a6a7e] hover:text-[#0a1a2a] transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={createGroup}
+          disabled={!groupName.trim() || groupParticipants.length === 0}
+          className="px-5 py-2 bg-gradient-to-r from-[#3a7a9e] to-[#1a5a7e] hover:from-[#2a6a8e] hover:to-[#0a4a6e] text-white rounded-lg text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-[#3a7a9e]/20"
+        >
+          Create Group
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   )
 }
