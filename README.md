@@ -126,8 +126,8 @@ chat-app/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/chat-app-assignment.git
-cd chat-app-assignment
+git clone https://github.com/RejoanaAkter/Chat-App
+cd Chat-App
 
 # 2. Install dependencies
 npm install
